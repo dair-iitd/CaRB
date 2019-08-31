@@ -1,6 +1,6 @@
 '''
 Usage:
-   benchmark --gold=GOLD_OIE --out=OUTPUT_FILE (--openiefive=OPENIE5 | --stanford=STANFORD_OIE | --ollie=OLLIE_OIE |--reverb=REVERB_OIE | --clausie=CLAUSIE_OIE | --openiefour=OPENIEFOUR_OIE | --props=PROPS_OIE | --tabbed=TABBED_OIE | --rnnoie=RNN_OIE | --benchmarkGold=BENCHMARK_GOLD) [--exactMatch | --predMatch | --lexicalMatch | --binaryMatch | --simpleMatch | --strictMatch] [--error-file=ERROR_FILE] [--binary]
+   benchmark --gold=GOLD_OIE --out=OUTPUT_FILE (--openiefive=OPENIE5 | --stanford=STANFORD_OIE | --ollie=OLLIE_OIE |--reverb=REVERB_OIE | --clausie=CLAUSIE_OIE | --openiefour=OPENIEFOUR_OIE | --props=PROPS_OIE | --tabbed=TABBED_OIE | --benchmarkGold=BENCHMARK_GOLD) [--exactMatch | --predMatch | --lexicalMatch | --binaryMatch | --simpleMatch | --strictMatch] [--error-file=ERROR_FILE] [--binary]
 
 Options:
   --gold=GOLD_OIE              The gold reference Open IE file (by default, it should be under ./oie_corpus/all.oie).
@@ -16,7 +16,6 @@ Options:
   --tabbed=TABBED_OIE          Read simple tab format file, where each line consists of:
                                 sent, prob, pred,arg1, arg2, ...
   --exactmatch                 Use exact match when judging whether an extraction is correct.
-  --rnnoie=RNN_OIE             Read from RNN_OIE
 '''
 from __future__ import division
 import docopt
@@ -40,7 +39,6 @@ from oie_readers.openieFiveReader import OpenieFiveReader
 from oie_readers.propsReader import PropSReader
 from oie_readers.tabReader import TabReader
 from oie_readers.benchmarkGoldReader import BenchmarkGoldReader
-from oie_readers.rnnoieReader import RnnOIEReader
 
 from oie_readers.goldReader import GoldReader
 from matcher import Matcher
@@ -101,8 +99,6 @@ class Benchmark:
                 for j, predictedEx in enumerate(predictedExtractions):
                     score = matchingFunc(goldEx, predictedEx,ignoreStopwords = True,ignoreCase = True)
                     scores[i][j] = score
-                    # print(str(score[0])+" ",end='')
-                # print('\n')
             
             for c, conf in enumerate(np.linspace(0,1,num_conf)):
                 for i,row in enumerate(scores):
@@ -118,18 +114,19 @@ class Benchmark:
         prec_scores = [a/b if b>0 else 1 for a,b in zip(p,pl) ]
         rec_scores = [a/b if b>0 else 0 for a,b in zip(r,rl)]
 
-        # every PR curve contains the point corresponding to precision=1 , recall=0
-        rec_scores.append(0)
-        prec_scores.append(1)
-
         f1s = [Benchmark.f1(p,r) for p,r in zip(prec_scores, rec_scores)]
         optimal_idx = np.argmax(f1s)
         optimal = (prec_scores[optimal_idx], rec_scores[optimal_idx], f1s[optimal_idx])
-        print("AUC: {}\t Optimal (precision, recall, F1): {}".format(auc(rec_scores, prec_scores), optimal))
+
+        # In order to calculate auc, we need to add the point corresponding to precision=1 , recall=0 to the PR-curve
+        temp_rec_scores = rec_scores.copy()
+        temp_prec_scores = prec_scores.copy()
+        temp_rec_scores.append(0)
+        temp_prec_scores.append(1)
+        print("AUC: {}\t Optimal (precision, recall, F1): {}".format(auc(temp_rec_scores, temp_prec_scores), optimal))
         
         with open(output_fn, 'w') as fout:
             fout.write('{0}\t{1}\n'.format("Precision", "Recall"))
-            # for cur_p, cur_r in sorted(zip(prec_scores, rec_scores), key = lambda (cur_p, cur_r): cur_r):
             for cur_p, cur_r in sorted(zip(prec_scores, rec_scores), key = lambda cur: cur[1]):
                 fout.write('{0}\t{1}\n'.format(cur_p, cur_r))
 
@@ -139,7 +136,6 @@ class Benchmark:
         for sent,extr in extrs.items():
             for ex in extr:
                 #Add (a1, r, a2)
-                # temp = ex.copy()
                 temp = copy(ex)
                 temp.args = ex.args[:2]
                 res[sent].append(temp)
@@ -293,10 +289,6 @@ if __name__ == '__main__':
     if args['--tabbed']:
         predicted = TabReader()
         predicted.read(args['--tabbed'])
- 
-    if args['--rnnoie']:
-        predicted = RnnOIEReader()
-        predicted.read(args['--rnnoie'])
 
     if args['--binaryMatch']:
         matchingFunc = Matcher.binary_tuple_match
