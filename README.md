@@ -12,8 +12,8 @@ The details of this benchmark are elaborated in our [EMNLP 2019 Paper](http://ww
 ### Citing
 If you use this software, please cite:
 ```
-@InProceedings{Aggarwal2019EMNLP,
-  author    = {Sangnie Bhardwaj, Samarth Aggarwal and Mausam},
+@InProceedings{EMNLP2019_4099,
+  author    = {Bhardwaj, Sangnie and Aggarwal, Samarth and Mausam},
   title     = {CaRB : A Crowdsourced Benchmark for Open IE},
   booktitle = {Proceedings of the 2019 Conference on Empirical Methods in Natural Language Processing (EMNLP)},
   month     = {November},
@@ -21,6 +21,7 @@ If you use this software, please cite:
   address   = {Hong Kong, China},
   publisher = {Association for Computational Linguistics},
   pages     = {(to appear)},
+  url       = {http://www.cse.iitd.ernet.in/~mausam/papers/emnlp19.pdf}
 }
 ```
 
