@@ -164,7 +164,7 @@ class Benchmark:
 
         f1s = [Benchmark.f1(p,r) for p,r in zip(prec_scores, rec_scores)]
         try:
-            optimal_idx = np.argmax(f1s)
+            optimal_idx = np.nanargmax(f1s)
             optimal = (prec_scores[optimal_idx], rec_scores[optimal_idx], f1s[optimal_idx])
         except ValueError:
             # When there is no prediction

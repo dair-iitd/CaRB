@@ -76,7 +76,7 @@ Options:
 
 In the course of this work we tested the above mentioned Open IE parsers against our benchmark.
 We provide the output files (i.e., Open IE extractions) of each of these
-systems in [systems_outputs/test](systems_outputs/test).
+systems in [systems_outputs/test](system_outputs/test).
 You can give each of these files to [carb.py](carb.py), to get the corresponding precision recall curve.
 
 For example, to evaluate Stanford Open IE output, run:
@@ -96,3 +96,11 @@ Options:
   --in=DIR_NAME            Folder in which to search for *.dat files, all of which should be in a P/R column format (outputs from benchmark.py).
   --out=OUTPUT_FILENAME    Output filename, filetype will determine the format. Possible formats: pdf, pgf, png
 ```
+
+### References
+
+1. Creating a large benchmark for Open Information Extraction - Stanovsky and Dagan, 2016
+2. Analysing Errors of Open Information Extraction Systems - Schneider et al., 2017
+3. Wire57 : A Fine-Grained Benchmark for Open Information Extraction - L ́echelle et al., 2018
+
+
