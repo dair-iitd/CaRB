@@ -15,7 +15,10 @@ from glob import glob
 from docopt import docopt
 import matplotlib.pyplot as plt
 import logging
+import ipdb
 logging.basicConfig(level = logging.INFO)
+
+plt.rcParams.update({'font.size': 14})
 
 def trend_name(path):
     ''' return a system trend name from dat file path '''
@@ -28,7 +31,9 @@ def get_pr(path):
     with open(path) as fin:
         # remove header line
         fin.readline()
-        [p, r] = list(zip(*[[float(x) for x in line.strip().split('\t')] for line in fin]))
+        prc = list(zip(*[[float(x) for x in line.strip().split('\t')] for line in fin]))
+        p = prc[0]
+        r = prc[1]
         return p, r
     
 if __name__ == '__main__':
@@ -46,7 +51,7 @@ if __name__ == '__main__':
     # Set figure properties and save
     logging.info("Plotting P/R graph to {}".format(output_file))
     plt.ylim([0.0, 1.05])
-    plt.xlim([0.0, 1.0])
+    plt.xlim([0.0, 0.8])
     plt.xlabel('Recall')
     plt.ylabel('Precision')
     plt.legend(loc="lower right")
