@@ -151,61 +151,7 @@ class Matcher:
         rec = 1.0 * recall[0] / recall[1]
         return [prec, rec]
 
-    # SUBMITTED VERSION OF LINIENT TUPLE MATCH 
-    # def linient_tuple_match(ref, ex, ignoreStopwords, ignoreCase):
-    #     precision = [0, 0] # 0 out of 0 predicted words match
-    #     recall = [0, 0] # 0 out of 0 reference words match
-    #     # If, for each part, any word is the same as a reference word, then it's a match.
-
-    #     predicted_words = ex.pred.split()
-    #     gold_words = ref.pred.split()
-    #     precision[1] += len(predicted_words)
-    #     recall[1] += len(gold_words)
-
-    #     # matching_words = sum(1 for w in predicted_words if w in gold_words)
-    #     matching_words = 0
-    #     for w in gold_words:
-    #         if w in predicted_words:
-    #             matching_words += 1
-    #             predicted_words.remove(w)
-
-    #     precision[0] += matching_words
-    #     recall[0] += matching_words
-
-    #     for i in range(len(ref.args)):
-    #         gold_words = ref.args[i].split()
-    #         recall[1] += len(gold_words)
-    #         if len(ex.args) <= i:
-    #             if i<2:
-    #                 return (0,0) # changed
-    #             else:
-    #                 continue
-    #         predicted_words = ex.args[i].split()
-    #         precision[1] += len(predicted_words)
-    #         matching_words = 0
-    #         for w in gold_words:
-    #             if w in predicted_words:
-    #                 matching_words += 1
-    #                 predicted_words.remove(w)
-
-    #         precision[0] += matching_words
-    #         # Currently this slightly penalises systems when the reference
-    #         # reformulates the sentence words, because the reformulation doesn't
-    #         # match the predicted word. It's a one-wrong-word penalty to precision,
-    #         # to all systems that correctly extracted the reformulated word.
-    #         recall[0] += matching_words
-
-    #     if(precision[1] == 0):
-    #         prec = 0
-    #     else:
-    #         prec = 1.0 * precision[0] / precision[1]
-    #     if(recall[1] == 0):
-    #         rec = 0
-    #     else:
-    #         rec = 1.0 * recall[0] / recall[1]
-    #     return [prec, rec]
-
-    # STRICTER MATCH
+    # STRICTER LINIENT MATCH
     def linient_tuple_match(ref, ex, ignoreStopwords, ignoreCase):
         precision = [0, 0] # 0 out of 0 predicted words match
         recall = [0, 0] # 0 out of 0 reference words match
@@ -232,9 +178,7 @@ class Matcher:
                     predicted_words.remove("be")
                     break
 
-        # rel_matched = True
         if matching_words == 0:
-        #    # rel_matched = False
            return [0,0] # t <-> gt is not a match
 
         precision[0] += matching_words
@@ -256,11 +200,6 @@ class Matcher:
                     matching_words += 1
                     predicted_words.remove(w)
 
-            # if matching_words == 0 and i==0 and rel_matched == False:
-            #     return [0,0] # t <-> gt is not a match
-
-            # if matching_words == 0 and i<2:
-            #     return [0,0] # t <-> gt is not a match
             precision[0] += matching_words
             # Currently this slightly penalises systems when the reference
             # reformulates the sentence words, because the reformulation doesn't

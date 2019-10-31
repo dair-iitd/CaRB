@@ -39,7 +39,6 @@ from oie_readers.openieFiveReader import OpenieFiveReader
 from oie_readers.propsReader import PropSReader
 from oie_readers.tabReader import TabReader
 from oie_readers.benchmarkGoldReader import BenchmarkGoldReader
-# from oie_readers.allennlpReader import AllennlpReader
 
 from oie_readers.goldReader import GoldReader
 from matcher import Matcher
@@ -90,14 +89,6 @@ class Benchmark:
         r = np.zeros(num_conf)
         rl = np.zeros(num_conf)
 
-        # num_conf = 200
-
-        # results = {}
-        # p = [0 for _ in np.linspace(0,1,num_conf)]
-        # pl = [0 for _ in np.linspace(0,1,num_conf)]
-        # r = [0 for _ in np.linspace(0,1,num_conf)]
-        # rl = [0 for _ in np.linspace(0,1,num_conf)]
-
         for sent, goldExtractions in gold.items():
 
             if sent in predicted:
@@ -117,78 +108,6 @@ class Benchmark:
                     score = matchingFunc(goldEx, predictedEx,ignoreStopwords = True,ignoreCase = True)
                     scores[i][j] = score
 
-            # for c, conf in enumerate(confidence_thresholds):
-
-            #     ext_indices = []
-            #     for ext_indx, extraction in enumerate(predictedExtractions):
-            #         if extraction.confidence >= conf:
-            #             ext_indices.append(ext_indx)
-
-            #     for i,row in enumerate(scores):
-            #         r[c] += max([score[1] for col, score in enumerate(row) if score and predictedExtractions[col].confidence >= conf] or [0] )
-            #     rl[c] += len(scores)
-
-                # DEFAULT
-                # if len(scores[0]) > 0:
-                #     for j in range(len(scores[0])):
-                #         if predictedExtractions[j].confidence >= conf:
-                #             p[c] += max([scores[i][j][0] if scores[i][j] else 0 for i in range(len(scores))])
-                #             pl[c] += 1
-
-                # SUBMITTED
-                # selected_indices = []
-                # if len(scores[0]) > 0:
-                #     for j in range(len(scores[0])):
-                #         if predictedExtractions[j].confidence >= conf:
-                #             index = np.argmax([scores[i][j][0] if (i not in selected_indices and scores[i][j]) else 0 for i in range(len(scores))])
-                #             selected_indices.append(index)
-                #             p[c] += scores[index][j][0] #max([scores[i][j][0] if scores[i][j] else 0 for i in range(len(scores))])
-                #             pl[c] += 1
-
-
-                # GREEDY ORDER OF TRAVERSAL
-                # selected_indices = []
-                # for j in range(len(scores[0])):
-                #     if predictedExtractions[j].confidence >= conf:
-                #         column = [scores[i][j][0] for i in range(len(scores))]
-                #         sorted_indices = np.argsort(column)[::-1]
-                #         for index in sorted_indices:
-                #             if index not in selected_indices:
-                #                 selected_indices.append(index)
-                #                 p[c] += scores[index][j][0]
-                #                 break
-                # pl[c] += len(ext_indices)
-
-
-                # # GLOBAL MATCH
-                # selected_rows = []
-                # selected_cols = []
-                # num_precision_matches = min(len(scores), len(ext_indices))
-                # for t in range(num_precision_matches):
-                #     matched_row = -1
-                #     matched_col = -1
-                #     matched_precision = -1 # initialised to <0 so that it updates whenever precision is 0 as well
-                #     for i in range(len(scores)):
-                #         if i in selected_rows:
-                #             continue
-                #         for ext_indx in ext_indices:
-                #             if ext_indx in selected_cols:
-                #                 continue
-                #             if scores[i][ext_indx][0] > matched_precision:
-                #                 matched_precision = scores[i][ext_indx][0]
-                #                 matched_row = i
-                #                 matched_col = ext_indx
-
-                #     if matched_col==-1 or matched_row==-1:
-                #         ipdb.set_trace()
-                #         continue
-
-                #     selected_rows.append(matched_row)
-                #     selected_cols.append(matched_col)
-                #     p[c] += scores[matched_row][matched_col][0]
-                #     # pl[c] += 1
-                # pl[c] += len(ext_indices)
-
 
             # OPTIMISED GLOBAL MATCH
             sent_confidences = [extraction.confidence for extraction in predictedExtractions]
@@ -207,9 +126,7 @@ class Benchmark:
                     recall_numerator += max_recall_row
 
                 precision_numerator = 0
-                # for ext_indx in ext_indices:
-                #     max_precision_col = max([scores[row_indx][ext_indx][0] for row_indx in range(len(scores)) if scores[row_indx][ext_indx] != (0,0)], default = 1)
-                #     precision_numerator += max_precision_col
+
                 selected_rows = []
                 selected_cols = []
                 num_precision_matches = min(len(scores), len(ext_indices))
@@ -228,17 +145,12 @@ class Benchmark:
                                 matched_row = i
                                 matched_col = ext_indx
 
-                    if matched_col==-1 or matched_row==-1:
-                        print("matched row/col is -1")
-                        ipdb.set_trace()
-
                     selected_rows.append(matched_row)
                     selected_cols.append(matched_col)
                     precision_numerator += scores[matched_row][matched_col][0]
                 
                 p[prev_c:c+1] += precision_numerator
                 pl[prev_c:c+1] += len(ext_indices)
-                # pl[prev_c:c+1] += num_precision_matches
                 r[prev_c:c+1] += recall_numerator
                 rl[prev_c:c+1] += len(scores)
 
@@ -345,7 +257,6 @@ class Benchmark:
                            "precision_of_matches" : prec_scores,
                            "recall_of_matches" : rec_scores
         }
-        # print(scoring_metrics)
         return scoring_metrics
 
     # Helper functions:
@@ -435,10 +346,6 @@ if __name__ == '__main__':
     if args['--tabbed']:
         predicted = TabReader()
         predicted.read(args['--tabbed'])
-
-    # if args['--allennlp']:
-    #     predicted = AllennlpReader(threshold = None)
-    #     predicted.read(args['--allennlp'])
 
     if args['--binaryMatch']:
         matchingFunc = Matcher.binary_tuple_match
